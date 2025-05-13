@@ -1,2 +1,2 @@
 # b07lab1
-CSCB07 Lab 1
+This repository contains the exercise for **Lab 1** of the course **CSCB07: Software Design** at the **University of Toronto Scarborough**.
