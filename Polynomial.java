@@ -1,9 +1,9 @@
 import java.io.File;
 import java.io.PrintStream;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Polynomial{
-
     // fields
     double[] coefficients;
     int[] exponents;
@@ -16,37 +16,44 @@ public class Polynomial{
 
     // constructor - 1 argument
     public Polynomial(File file){
-        Scanner s = new Scanner(file);
-        String p = s.nextLine();
+        try{
+            Scanner s = new Scanner(file);
+            String p = s.nextLine();
 
-        p = p.replace("-", "+-");
+            p = p.replace("-", "+-");
 
-        String[] data = p.split("[+]");
+            String[] data = p.split("[+]");
 
-        this.coefficients = new double[data.length];
-        this.exponents = new int[data.length];
+            this.coefficients = new double[data.length];
+            this.exponents = new int[data.length];
 
-        for (int i = 0; i < data.length; i++){
-            String[] inner = data[i].split("[x]");
+            for (int i = 0; i < data.length; i++){
+                String[] inner = data[i].split("[x]");
 
-            double coefficient = Double.parseDouble(inner[0]);
-            int exponent = 0;
-            if (inner.length == 2){
-                exponent = Integer.parseInt(inner[1]);
+                double coefficient = Double.parseDouble(inner[0]);
+                int exponent = 0;
+                if (inner.length == 2){
+                    exponent = Integer.parseInt(inner[1]);
+                }
+
+                this.coefficients[i] = coefficient;
+                this.exponents[i] = exponent;
             }
 
-            this.coefficients[i] = coefficient;
-            this.exponents[i] = exponent;
+            s.close();
         }
-
-        s.close();
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     // constructor - 2 arguments
     public Polynomial(double[] coefficients, int[] exponents){
         this.coefficients = new double[coefficients.length];
         for (int i = 0; i < coefficients.length; i++){
-            this.coefficients[i] = coefficients[i];
+            if (coefficients[i] != 0.0){
+                this.coefficients[i] = coefficients[i];
+            }
         }
 
         this.exponents = new int[exponents.length];
@@ -135,6 +142,7 @@ public class Polynomial{
         double[] temp_coefficients = new double[coefficients1.length*coefficients2.length];
         int[] temp_exponents = new int[exponents1.length*exponents2.length];
 
+        // add to temp_coefficients and temp_exponents
         int tracker = 0;
         for (int i = 0; i < coefficients1.length; i++){
             for (int j = 0; j < coefficients2.length; j++){
@@ -144,7 +152,7 @@ public class Polynomial{
             }
         }
 
-        
+        // remove the duplicates
         for (int i = 0; i < temp_exponents.length-1; i++){
             for (int j = i+1; j < temp_exponents.length; j++){
                 if (temp_exponents[i] == temp_exponents[j]){
@@ -154,6 +162,7 @@ public class Polynomial{
             }
         }
 
+        // remove zero elements
         int countNonZero = 0;
         for (int i = 0; i < temp_coefficients.length; i++){
             if (temp_coefficients[i] != 0){
@@ -164,19 +173,19 @@ public class Polynomial{
         double[] final_coefficients = new double[countNonZero];
         int[] final_exponents = new int[countNonZero];
 
-        int tracker = 0;
+        int t = 0;
         for (int i = 0; i < temp_coefficients.length; i++){
             if (temp_coefficients[i] != 0){
-                final_coefficients[tracker] = temp_coefficients[i];
-                final_exponents[tracker] = temp_exponents[i];
-                tracker++;
+                final_coefficients[t] = temp_coefficients[i];
+                final_exponents[t] = temp_exponents[i];
+                t++;
             }
         }
 
         return new Polynomial(final_coefficients, final_exponents);
     }
 
-    public void saveToFile(String file){
+    public void saveToFile(String file) throws FileNotFoundException{
         PrintStream ps = new PrintStream(new File(file));
         String polynomial = "";
 
@@ -187,6 +196,7 @@ public class Polynomial{
             if(this.coefficients[i] > 0){
                 polynomial += "+";
             }
+            // note: if you type case to int then you lose the decimal part
             polynomial += String.valueOf(this.coefficients[i]);
             if (this.exponents[i] == 0){
                 continue;
